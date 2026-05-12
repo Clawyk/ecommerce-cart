@@ -7,22 +7,43 @@ import com.cart.strategy.StandardPricing;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Alışveriş sepeti ana sınıfı.
+ *
+ * Başlangıçta tüm sorumluluklar bu sınıftaydı:
+ * indirim hesaplama, ödeme alma, bildirim gönderme...
+ * Refactoring sonrası her sorumluluk kendi yerine taşındı.
+ *
+ * Şu an bu sınıf sadece ürün listesini yönetiyor,
+ * geri kalanını Strategy ve Observer hallediyor.
+ */
 public class ShoppingCart {
 
     private List<Product> items = new ArrayList<>();
 
-    // STRATEGY — runtime'da değiştirilebilir fiyatlandırma
+    /**
+     * Strategy Pattern: Fiyatlandırma algoritması dışarıdan verilir.
+     * Varsayılan olarak StandardPricing kullanılır.
+     * Runtime'da setPricingStrategy() ile değiştirilebilir.
+     */
     private PricingStrategy pricingStrategy = new StandardPricing();
 
-    // OBSERVER — sepeti dinleyen sistemler
+    /**
+     * Observer Pattern: Sepeti dinleyen sistemlerin listesi.
+     * ShoppingCart bu sistemleri tanımıyor, sadece haber veriyor.
+     * Yeni sistem eklemek için sadece addObserver() çağrılır.
+     */
     private List<CartObserver> observers = new ArrayList<>();
 
-    // Observer ekle
     public void addObserver(CartObserver observer) {
         observers.add(observer);
     }
 
-    // Strategy değiştir — runtime'da bile çalışır
+    /**
+     * Fiyatlandırma stratejisini değiştirir.
+     * Bu metodun gücü: uygulama çalışırken bile strateji değişebilir.
+     * if-else yazmak zorunda kalmıyoruz — Open/Closed Principle sağlandı.
+     */
     public void setPricingStrategy(PricingStrategy strategy) {
         this.pricingStrategy = strategy;
     }
@@ -30,6 +51,7 @@ public class ShoppingCart {
     public void addItem(Product p) {
         items.add(p);
         System.out.println(p.name + " eklendi.");
+        // Tüm observer'ları haberdar et — stok rezerve edilsin, analitik yazsın vs.
         for (CartObserver o : observers) {
             o.onItemAdded(p);
         }
@@ -43,6 +65,11 @@ public class ShoppingCart {
         }
     }
 
+    /**
+     * Toplam fiyatı aktif stratejiye göre hesaplar.
+     * Hangi algoritmanın kullanıldığını ShoppingCart bilmiyor,
+     * bu karar PricingStrategy'ye bırakıldı.
+     */
     public double calculateTotal() {
         double total = pricingStrategy.calculate(items);
         System.out.println(pricingStrategy.getDescription());
@@ -56,6 +83,7 @@ public class ShoppingCart {
     public void checkout(String paymentMethod) {
         double total = calculateTotal();
         System.out.println(paymentMethod + " ile " + total + " TL ödendi.");
+        // Ödeme sonrası tüm observer'ları bilgilendir
         for (CartObserver o : observers) {
             o.onCheckoutCompleted(total);
         }
