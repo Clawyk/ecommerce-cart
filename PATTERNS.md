@@ -42,3 +42,32 @@ Decorator bağlantıları, ödeme çağrısı hep ayrı ayrı yapılıyordu.
 - Dışarıdan tek satır: checkout.checkout("CREDIT_CARD")
 - İç karmaşıklık gizlendi
 - Decorator'lar merkezi olarak Facade içinde bağlandı
+
+## FAZ 3 — Strategy Pattern
+
+### Nerede Uygulandı?
+`com.cart.strategy` — StandardPricing, DiscountedPricing, BulkPricing
+
+### Neden Bu Örüntü?
+Fiyatlandırma algoritması runtime'da değişmesi gerekiyordu.
+if-else ile yapılsaydı her yeni algoritma mevcut kodu bozardı.
+
+### Ne Kazandık?
+- Runtime'da algoritma değişimi: setPricingStrategy()
+- Her algoritma kendi sınıfında, test edilebilir
+- OCP sağlandı: yeni algoritma için mevcut koda dokunulmadı
+
+## FAZ 3 — Observer Pattern
+
+### Nerede Uygulandı?
+`com.cart.observer` — InventoryObserver, NotificationObserver, AnalyticsObserver
+
+### Neden Bu Örüntü?
+Sepet değişikliklerinde stok, bildirim, analitik sistemleri
+haberdar edilmesi gerekiyordu. ShoppingCart bu sistemleri
+doğrudan çağırsaydı sıkı bağımlılık oluşurdu.
+
+### Ne Kazandık?
+- ShoppingCart observer'ları tanımıyor, sadece bildirim yapıyor
+- Yeni sistem eklemek: addObserver(new XxxObserver())
+- Sistemler birbirinden bağımsız
