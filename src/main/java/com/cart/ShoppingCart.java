@@ -1,8 +1,8 @@
 package com.cart;
 
-import com.cart.decorator.CartDecorator;
-import com.cart.discount.Discount;
-import com.cart.discount.DiscountFactory;
+import com.cart.observer.CartObserver;
+import com.cart.strategy.PricingStrategy;
+import com.cart.strategy.StandardPricing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,49 +10,54 @@ import java.util.List;
 public class ShoppingCart {
 
     private List<Product> items = new ArrayList<>();
-    private Discount discount = DiscountFactory.create("NONE", 0);
 
-    // Decorator listesi — her katman sırayla çalışır
-    private List<CartDecorator> decorators = new ArrayList<>();
+    // STRATEGY — runtime'da değiştirilebilir fiyatlandırma
+    private PricingStrategy pricingStrategy = new StandardPricing();
 
-    public void addDecorator(CartDecorator decorator) {
-        decorators.add(decorator);
+    // OBSERVER — sepeti dinleyen sistemler
+    private List<CartObserver> observers = new ArrayList<>();
+
+    // Observer ekle
+    public void addObserver(CartObserver observer) {
+        observers.add(observer);
+    }
+
+    // Strategy değiştir — runtime'da bile çalışır
+    public void setPricingStrategy(PricingStrategy strategy) {
+        this.pricingStrategy = strategy;
     }
 
     public void addItem(Product p) {
         items.add(p);
         System.out.println(p.name + " eklendi.");
-        // Tüm decorator'ları bilgilendir
-        for (CartDecorator d : decorators) {
-            d.onItemAdded(p);
+        for (CartObserver o : observers) {
+            o.onItemAdded(p);
         }
     }
 
     public void removeItem(String name) {
         items.removeIf(p -> p.name.equals(name));
         System.out.println(name + " çıkarıldı.");
+        for (CartObserver o : observers) {
+            o.onItemRemoved(name);
+        }
     }
 
     public double calculateTotal() {
-        double total = 0;
-        for (Product p : items) {
-            total += p.price * p.quantity;
-        }
-        double discounted = discount.apply(total);
-        System.out.println(discount.getDescription());
-        return discounted;
+        double total = pricingStrategy.calculate(items);
+        System.out.println(pricingStrategy.getDescription());
+        return total;
     }
 
-    public void setDiscount(String type, double value) {
-        this.discount = DiscountFactory.create(type, value);
+    public List<Product> getItems() {
+        return items;
     }
 
     public void checkout(String paymentMethod) {
         double total = calculateTotal();
         System.out.println(paymentMethod + " ile " + total + " TL ödendi.");
-        // Tüm decorator'ları bilgilendir
-        for (CartDecorator d : decorators) {
-            d.onCheckout(total);
+        for (CartObserver o : observers) {
+            o.onCheckoutCompleted(total);
         }
         items.clear();
     }
