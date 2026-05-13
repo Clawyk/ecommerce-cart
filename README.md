@@ -1,4 +1,10 @@
-# E-Ticaret Sepeti — Tasarım Örüntüleri Ödevi
+# d-) E-Ticaret Sepeti — Tasarım Örüntüleri Ödevi
+
+
+## Proje Seçme Gerekçesi
+Java diline daha yatkın oldugum ve class lar ile uğraşmak hoşuma gittiği
+için bu projeyi seçtim.
+
 
 ## Proje Hakkında
 Java ile geliştirilmiş e-ticaret sepeti uygulaması.
@@ -8,12 +14,12 @@ Yazılım Tasarım Örüntüleri dersi kapsamında 5 farklı
 ## Kullanılan Tasarım Örüntüleri
 
 | Faz | Örüntü | Sınıf |
-|-----|--------|-------|
-| 1 | Factory Method | DiscountFactory |
-| 2 | Decorator | LoggingDecorator, EmailDecorator, StockDecorator |
-| 2 | Facade | CheckoutFacade |
-| 3 | Strategy | StandardPricing, DiscountedPricing, BulkPricing |
-| 3 | Observer | InventoryObserver, NotificationObserver, AnalyticsObserver |
+
+ 1  Factory Method | DiscountFactory |
+ 2  Decorator | LoggingDecorator, EmailDecorator, StockDecorator |
+ 2  Facade | CheckoutFacade |
+ 3  Strategy | StandardPricing, DiscountedPricing, BulkPricing |
+ 3  Observer | InventoryObserver, NotificationObserver, AnalyticsObserver |
 
 ## Proje Yapısı
 src/main/java/com/cart/
