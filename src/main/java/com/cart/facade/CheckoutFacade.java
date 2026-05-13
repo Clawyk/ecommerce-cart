@@ -17,6 +17,8 @@ import com.cart.observer.NotificationObserver;
  * Facade vs Observer farkı:
  * Observer → "bir şey olunca haber ver"
  * Facade  → "karmaşık süreci basit arayüzün arkasına sakla"
+ * Observer'ları merkezi olarak checkoutFacade de  bağlayacağız
+ * Böylece her yerde tek tek addObserver() yazmak zorunda kalmayacağız
  */
 public class CheckoutFacade {
 
@@ -24,8 +26,7 @@ public class CheckoutFacade {
 
     public CheckoutFacade(ShoppingCart cart) {
         this.cart = cart;
-        // Observer'ları merkezi olarak burada bağlıyoruz
-        // Böylece her yerde tek tek addObserver() yazmak zorunda kalmıyoruz
+
         cart.addObserver(new InventoryObserver());
         cart.addObserver(new NotificationObserver());
         cart.addObserver(new AnalyticsObserver());

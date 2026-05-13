@@ -69,6 +69,7 @@ public class ShoppingCart {
      * Toplam fiyatı aktif stratejiye göre hesaplar.
      * Hangi algoritmanın kullanıldığını ShoppingCart bilmiyor,
      * bu karar PricingStrategy'ye bırakıldı.
+     * Ödeme sonrası tüm observer'ları bilgilendirme işlemi yapılacak
      */
     public double calculateTotal() {
         double total = pricingStrategy.calculate(items);
@@ -83,7 +84,7 @@ public class ShoppingCart {
     public void checkout(String paymentMethod) {
         double total = calculateTotal();
         System.out.println(paymentMethod + " ile " + total + " TL ödendi.");
-        // Ödeme sonrası tüm observer'ları bilgilendir
+
         for (CartObserver o : observers) {
             o.onCheckoutCompleted(total);
         }
@@ -91,7 +92,7 @@ public class ShoppingCart {
     }
 
     public void printCart() {
-        System.out.println("=== SEPET ===");
+        System.out.println("SEPET");
         for (Product p : items) {
             System.out.println(p.name + " x" + p.quantity
                     + " = " + (p.price * p.quantity) + " TL");

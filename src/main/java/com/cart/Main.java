@@ -5,47 +5,147 @@ import com.cart.strategy.BulkPricing;
 import com.cart.strategy.DiscountedPricing;
 import com.cart.strategy.StandardPricing;
 
+import java.util.Scanner;
+
 /**
- * Uygulamanın giriş noktası.
- *
- * Burada 3 farklı fiyatlandırma stratejisini gösteriyoruz:
- * 1. Standart fiyat
- * 2. Yüzde indirimli fiyat
- * 3. Toplu alım fiyatı
- *
- * Strategy Pattern'in gücü: aynı sepet nesnesi üzerinde
- * algoritma runtime'da değiştiriliyor, if-else yok.
+ * Kullanıcı girdili interaktif konsol uygulaması.
+ * Kullanıcı ürün ekleyip çıkarabilir, strateji seçebilir ve ödeme yapabilir.
  */
 public class Main {
+
+    static ShoppingCart cart = new ShoppingCart();
+    static CheckoutFacade checkout = new CheckoutFacade(cart);
+    static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
+        System.out.println("-----E-TİCARET SEPET SİSTEMİ-----");
 
-        ShoppingCart cart = new ShoppingCart();
+        boolean devam = true;
+        while (devam) {
+            printMenu();
+            String secim = scanner.nextLine().trim();
 
-        // Facade tüm observer'ları otomatik bağlıyor
-        CheckoutFacade checkout = new CheckoutFacade(cart);
+            switch (secim) {
+                case "1":
+                    urunEkle();
+                    break;
+                case "2":
+                    urunCikar();
+                    break;
+                case "3":
+                    cart.printCart();
+                    break;
+                case "4":
+                    stratejiSec();
+                    break;
+                case "5":
+                    odemeAl();
+                    break;
+                case "0":
+                    System.out.println("Çıkılıyor...");
+                    devam = false;
+                    break;
+                default:
+                    System.out.println("Geçersiz seçim, tekrar deneyin.");
+            }
+        }
+        scanner.close();
+    }
 
-        // Ürünleri sepete ekle — her addItem Observer'ları tetikliyor
-        cart.addItem(new Product("Laptop", 15000, 1));
-        cart.addItem(new Product("Mouse", 500, 2));
-        cart.addItem(new Product("Klavye", 800, 1));
+    static void printMenu() {
+        System.out.println("  1. Ürün Ekle");
+        System.out.println("  2. Ürün Çıkar");
+        System.out.println("  3. Sepeti Görüntüle");
+        System.out.println("  4. Fiyatlandırma Stratejisi Seç");
+        System.out.println("  5. Ödeme Yap");
+        System.out.println("  0. Çıkış");
+        System.out.print("Seçiminiz: ");
+    }
 
-        // Strateji 1: Standart fiyat (varsayılan)
-        System.out.println("\n--- Standart Fiyat ---");
-        cart.printCart();
+    static void urunEkle() {
+        System.out.print("Ürün adı: ");
+        String ad = scanner.nextLine().trim();
 
-        // Strateji 2: Runtime'da %10 indirime geçiyoruz
-        // if-else yazmadık, sadece stratejiyi değiştirdik
-        System.out.println("\n--- %10 İndirimli Fiyat ---");
-        cart.setPricingStrategy(new DiscountedPricing(10));
-        cart.printCart();
+        System.out.print("Fiyat (TL): ");
+        double fiyat;
+        try {
+            fiyat = Double.parseDouble(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Geçersiz fiyat!");
+            return;
+        }
 
-        // Strateji 3: Toplu alım — 3+ ürün varsa %15 indirim
-        System.out.println("\n--- Toplu Alım Fiyatı ---");
-        cart.setPricingStrategy(new BulkPricing());
-        cart.printCart();
+        System.out.print("Adet: ");
+        int adet;
+        try {
+            adet = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Geçersiz adet!");
+            return;
+        }
 
-        // Ödeme — Facade tüm süreci yönetiyor
-        System.out.println();
-        checkout.checkout("CREDIT_CARD");
+        cart.addItem(new Product(ad, fiyat, adet));
+    }
+
+    static void urunCikar() {
+        System.out.print("Çıkarılacak ürün adı: ");
+        String ad = scanner.nextLine().trim();
+        cart.removeItem(ad);
+    }
+
+    static void stratejiSec() {
+        System.out.println("\nFiyatlandırma Stratejileri:");
+        System.out.println("  1. Standart Fiyat");
+        System.out.println("  2. Yüzde İndirim");
+        System.out.println("  3. Toplu Alım (%15 indirim, 3+ ürün)");
+        System.out.print("Seçiminiz: ");
+
+        String secim = scanner.nextLine().trim();
+        switch (secim) {
+            case "1":
+                cart.setPricingStrategy(new StandardPricing());
+                System.out.println("Standart fiyatlandırma seçildi.");
+                break;
+            case "2":
+                System.out.print("İndirim yüzdesi: %");
+                try {
+                    double yuzde = Double.parseDouble(scanner.nextLine().trim());
+                    cart.setPricingStrategy(new DiscountedPricing(yuzde));
+                    System.out.println("%" + yuzde + " indirimli fiyatlandırma seçildi.");
+                } catch (NumberFormatException e) {
+                    System.out.println("Geçersiz değer!");
+                }
+                break;
+            case "3":
+                cart.setPricingStrategy(new BulkPricing());
+                System.out.println("Toplu alım fiyatlandırması seçildi.");
+                break;
+            default:
+                System.out.println("Geçersiz seçim.");
+        }
+    }
+
+    static void odemeAl() {
+        if (cart.getItems().isEmpty()) {
+            System.out.println("Sepet boş, önce ürün ekleyin!");
+            return;
+        }
+        System.out.println("\nÖdeme Yöntemleri:");
+        System.out.println("  1. Kredi Kartı");
+        System.out.println("  2. Nakit");
+        System.out.println("  3. PayPal");
+        System.out.print("Seçiminiz: ");
+
+        String secim = scanner.nextLine().trim();
+        String yontem;
+        switch (secim) {
+            case "1": yontem = "CREDIT_CARD"; break;
+            case "2": yontem = "CASH"; break;
+            case "3": yontem = "PAYPAL"; break;
+            default:
+                System.out.println("Geçersiz seçim.");
+                return;
+        }
+        checkout.checkout(yontem);
     }
 }

@@ -20,7 +20,6 @@ public class DiscountFactory {
             case "FIXED":
                 return new FixedDiscount(value);
             default:
-                // Null yerine NoDiscount döndürüyoruz — NullPointerException riski yok
                 return new NoDiscount();
         }
     }
